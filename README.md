@@ -1,7 +1,6 @@
 # 24-1-AI-EOD-01
 [ 24-1 /  AI EOD / Team 01 ]  
 👩‍💻 이승연, 변지은
-
 # 목차
 
 1. [Environment](#-environment)
@@ -68,7 +67,6 @@
     - 결정적으로 “중복 선택 시 게임 종료”라는 조건이 학습 속도를 너무 느리게 하고, 지뢰찾기 게임과도 맞지 않는 조건이다.
 
 <br>
-<br>
 
 ### 음수 보상 체계
 
@@ -93,6 +91,14 @@
 - 전체적으로 보상의 크기가 크면 학습이 불안정하다. 따라서 모두 -1~1 사이의 값으로 설정했다.
 
 <br>
+
+### 양수 보상 체계 vs. 음수 보상 체계
+
+![environment3](environment3.png)
+
+- 음수 보상 체계인 경우에 일정한 기울기로 더 안정적인 성능 향상을 보인다.
+
+<br>
 <br>
 
 - - -
@@ -115,4 +121,4 @@
 - `render_answer()`, `render(state)` 함수로 구현
 - `render_color()` 함수로 숫자별 색 적용
 
-![environment3](environment3.png)
+![environment4](environment4.png)

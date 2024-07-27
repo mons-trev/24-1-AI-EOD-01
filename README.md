@@ -2,15 +2,6 @@
 [ 24-1 /  AI EOD / Team 01 ]  
 👩‍💻 이승연, 변지은
 
-# 목차
-
-1. [Environment](#-environment)
-    1. [State](##-state)
-    2. [Reward Design](##-reward-design)
-    3. [속도 개선](##-속도-개선)
-    4. [Render](##-render)
-
-
 
 ---
 # 1. Environment
@@ -28,8 +19,6 @@
 
 <br>
 <br>
-
-- - -
 
 ## Reward Design
 
@@ -102,8 +91,6 @@
 <br>
 <br>
 
-- - -
-
 ## 속도 개선
 
 - list 자료형 대신 np.array 자료형 사용
@@ -113,8 +100,6 @@
 
 <br>
 <br>
-
-- - -
 
 ## Render
 
@@ -128,7 +113,6 @@
 <br>
 
 ---
----
 
 # 2. DQN Net
 
@@ -139,8 +123,6 @@
 - `conv_units`: 각 컨볼루션 레이어의 채널 개수 (64)
 
 <br>
-
----
 
 ## 일반 CNN
 

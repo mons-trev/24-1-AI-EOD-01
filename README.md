@@ -545,7 +545,7 @@ EPISODES = 100000
 
 - 지뢰 `mine`: 지뢰를 밟은 경우
 - 성공 `clear`: 지뢰를 제외한 모든 좌표가 열린 경우
-- `empty`: 지뢰가 아닌 행동
+- `empty`: 지뢰가 아닌 곳을 밟는 경우
   
 ```python
   self.reward_dict = {'mine': -8, 'empty':1, 'clear':5}
@@ -558,8 +558,8 @@ EPISODES = 100000
 | reward | 5 | 1 | 
 | done | True | False | 
 
-- empty reward
-  - ver1. 한 에피소드 당, 누르는 횟수가 9번 이상 혹은 안 눌린 버튼이 30개 미만인 경우, machine 은 열려있는 판의 정보를 토대로 지       적인 추론을 해야한다고 판단하였다. 따라서 위의 2가지 경우, 한번 눌렀을 때 터지는 횟수를 `empty` 보상에 곱하여 더 큰 보상을 주었다.
+- `empty` reward
+  - ver1. 한 에피소드 당, 누르는 횟수가 9번 이상 혹은 안 눌린 버튼이 30개 미만인 경우, 열려있는 판의 정보를 토대로 지적인 추론을 할 확률이 높다고 판단하였다. <br>따라서 위의 2가지 경우, 한번 눌렀을 때 터지는 좌표의 개수를 `empty` 보상에 곱하여 더 큰 보상을 주었다.
 
       ```python
       reward = self.reward_dict['empty']
@@ -667,8 +667,8 @@ SAVE_EVERY=1000
 
 ## 4. DQN Agent
 
-DQN 에서 행동을 선택할 때, 2가지의 경우가 있다. <br>하나는 탐색으로 무작위로 하나를 뽑는 것이다. 현 모델을 Rule based 이기 때문에 밟지 않은 좌표 중 아무거나 하나를 반환하도록 설계하였다.
-나머지 하나는 탐욕 정책을 따르는 것인데, state 를 입력으로 주었을 때 가장 큰 q 값을 가진 action 을 반환하는 것이다. 따라서 밟지 않은 좌표 중 가장 큰 q 값을 가지는 것을 반환하도록 하였다. <br>이 때, 가장 큰 값을 구하기 위하여 밟은 곳은 -inf 마스킹을 해주어 양수, 음수 구분을 따로 하지 않고 한번에 최댓값을 반환할 수 있도록 하여 시간복잡도를 낮추었다.
+DQN 에서 행동을 선택할 때, 2가지의 경우가 있다. <br>하나는 탐색으로 무작위로 하나를 뽑는 것이다. 따라서 이 경우, 이 모델은 Rule based 이기 때문에 밟지 않은 좌표 중 아무거나 하나를 반환하도록 설계하였다.<br>
+나머지 하나는 탐욕 정책을 따르는 것이다. state 가 입력으로 주어졌을 때 가장 큰 q 값을 가진 action 을 반환하는 것이다. 따라서 밟지 않은 좌표 중 가장 큰 q 값을 가지는 것을 반환하도록 하였다. <br>이 때, 가장 큰 값을 구하기 위하여 밟은 곳은 -inf 마스킹을 해주어 양수, 음수 구분을 따로 하지 않고 한번에 최댓값을 반환할 수 있도록 하여 시간복잡도를 낮추었다.
 
 ```python
 def get_action(self, state):
@@ -745,13 +745,14 @@ if (episode+1) % LEARN_EPOCH == 0:
 
 ### train
 - 65만 episode 중 후기 15만 episode 의 성능 지표이다.
-- 약 5만 episode 마다 median cnt 가 하나씩 늘어나는 것을 알 수 있으며, avg clear 로 보아 train 시 성능이 약 30% 대에 수렴하는 것을 알 수 있다.
+- 약 5만 episode 마다 median cnt 가 하나씩 늘어나는 것을 알 수 있으며, 100 에피소드당 좌표를 누르는 개수의 중간값인 median cnt 는 12에 수렴하고 avg clear 로 보아 train 시 성능이 약 30% 대에 수렴하는 것을 알 수 있다.
 ![image](https://github.com/user-attachments/assets/353447a6-7797-42af-b903-4f909b0a6377)
 ![image](https://github.com/user-attachments/assets/ddaccbc4-6390-4ed7-8f03-acbbde1d1d81)
 ![image](https://github.com/user-attachments/assets/8983366f-161e-45d5-a8ce-e51f080483ea)
 
 ### test
-- test 는 model 을 evaluation 모드로 바꾸고, 탐색하는 과정을 없앴다.
+- test 는 model 을 evaluation 모드로 바꾸고, 탐색하는 과정을 없애 구현하였다.
 - 1만 EPISODE 로 테스트를 진행하고, 성능을 100 EPISODE 마다 기록하였다. Rule based 시, 최대 100 번 테스트 당 47 번 `CLEAR` 하는 것을 알 수 있고 평균 약 28% 의 성능을 내는 것을 확인하였다.
+- 약 70% 의 성능으로 수렴하는 No Rule based 에 비해 Rule based model 이 더 낮은 성능을 기록하는 것을 확인하였다.
   ![image](https://github.com/user-attachments/assets/b5ab6e3b-abea-4d6b-ba26-d1cc6937e52e)
 

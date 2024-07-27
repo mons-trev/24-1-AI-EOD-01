@@ -5,8 +5,7 @@ class Environment:
         self.nrow, self.ncol = self.gridworld_size
         self.num_mine = num_mine
 
-        # 그리드월드의 좌표(튜플)의 리스트
-        # points == action space
+        # points == action space (index)
         self.points = np.arange(self.nrow * self.ncol)
         self.num_actions = len(self.points)
 
@@ -20,11 +19,15 @@ class Environment:
         # 정답 맵
         self.map_answer, self.mine_bool = self.make_answer_map()
 
-        # state 맵
-        self.present_state = np.full((self.nrow, self.ncol), -1) # BFS로 탐색하지 않은 부분을 -1로 초기화
+        # state
+        self.present_state = np.full((self.nrow, self.ncol), -1)
 
 
     def make_answer_map(self):
+        '''
+        정답 맵을 생성하는 함수
+        output: 정답 맵, 지뢰 여부를 담은 bool 맵
+        '''
         answer_map = np.full(shape=(self.nrow, self.ncol), fill_value=0)
         x, y = np.divmod(self.mine_points, self.ncol)
         answer_map[x, y] = -2
@@ -49,9 +52,9 @@ class Environment:
 
     def bfs_minesweeper(self, clicked_idx:int):
         '''
-        input : 클릭할 idx
-        output : 클릭한 좌표에 따라서 열린 맵(array)
-        가려져있는 맵에서 클릭할 좌표에 따라 맵을 열어주는 함수
+        현재 state에서 클릭할 좌표에 따라 맵을 열어주는 함수
+        input : clicked_idx
+        output : clicked_idx에 따라 열린 맵(array)
         '''
         act_x, act_y = divmod(clicked_idx, self.ncol)
         queue = deque([(act_x, act_y)])
@@ -79,10 +82,10 @@ class Environment:
 
     def check_guess(self, clicked_idx:int):
         '''
-        input : clicked_idx(클릭한 좌표)
-        output : 해당 좌표가 guess인지 (bool)
-        클릭한 좌표가 guess인지 확인하는 함수
-        클릭한 좌표 주변 8칸이 모두 열리지 않은 경우 guess
+        clicked_idx가 guess인지 확인하는 함수
+        input : clicked_idx
+        output : clicked_idx가 guess인지 (bool)
+        clicked_idx 주변 8칸이 모두 열리지 않은 경우 guess
         '''
         directions = [(-1, 0), (1, 0), (0, -1), (0, 1),
                   (-1, -1), (-1, 1), (1, -1), (1, 1)]
@@ -105,7 +108,7 @@ class Environment:
         '''
         에이전트가 첫 번째로 선택한 action이 지뢰인 경우
         해당 좌표의 지뢰를 다른 곳으로 옮기는 함수
-        - input : action_idx - 좌표
+        input : action_idx
         '''
         empty_points = np.setdiff1d(self.points, self.mine_points)
         new_mine = np.random.choice(empty_points, 1)
@@ -113,17 +116,16 @@ class Environment:
         self.mine_points = np.delete(self.mine_points, np.where(self.mine_points == action_idx))
         self.mine_points = np.append(self.mine_points, new_mine[0])
 
-        # 정답 맵
+        # map reset
         self.map_answer, self.mine_bool = self.make_answer_map()
-        # state 맵
         self.present_state = np.full((self.nrow, self.ncol), -1)
 
 
     def step(self, action_idx:int):
         '''
         에이전트가 선택한 action에 따라 주어지는 next_state, reward, done
-        - input : action_idx - 좌표
-        - output : next_state, reward, done, clear
+        input : action_idx
+        output : next_state, reward, done, clear
         '''
         x, y = divmod(action_idx, self.ncol)
 
@@ -133,8 +135,6 @@ class Environment:
                 # 만약 start 좌표에 지뢰가 있는 경우 옮기기
                 self.move_mine(action_idx)
 
-
-        # action에 따라 계산된 state
         next_state = self.bfs_minesweeper(action_idx)
 
         # ======
@@ -177,15 +177,21 @@ class Environment:
 
 
     def reset(self):
-        # 지뢰 랜덤으로 배정
+        '''
+        환경을 리셋하는 함수
+        지뢰를 랜덤 초기화, 정답 맵과 state 초기화
+        '''
         self.mine_points = np.random.choice(self.points, self.num_mine, replace=False)
-        # 정답 맵
         self.map_answer, self.mine_bool = self.make_answer_map()
-        # state 맵
-        self.present_state = np.full((self.nrow, self.ncol), -1) # BFS로 탐색하지 않은 부분을 -1로 초기화
+        self.present_state = np.full((self.nrow, self.ncol), -1)
 
 
     def render(self, state):
+        '''
+        입력받은 state를 df타입으로 render
+        input: state
+        output: rendered state display
+        '''
         render_state = np.full(shape=(self.nrow, self.ncol), fill_value=".")
 
         for idx in self.points:
@@ -203,6 +209,10 @@ class Environment:
 
 
     def render_answer(self):
+        '''
+        answer map을 df타입으로 render
+        output: rendered answer map display
+        '''
         render_state = np.full(shape=(self.nrow, self.ncol), fill_value=".")
 
         for idx in self.points:
@@ -224,6 +234,11 @@ class Environment:
 
 
     def samples(self, num:int):
+        '''
+        입력받은 개수만큼의 지뢰 idx 리스트(특정 게임 판의 고유성) 생성
+        input: num
+        output: num 개수만큼의 지뢰 idx 리스트를 담은 array
+        '''
         sample_mine_points = []
 
         for i in range(num):
@@ -233,14 +248,21 @@ class Environment:
         return sample_mine_points
 
     def train_reset(self, samples:np.array):
+        '''
+        입력받은 샘플 게임판으로만 랜덤으로 리셋하는 함수
+        input: samples
+        '''
         self.mine_points = random.sample(samples, 1)[0]
-        # 정답 맵
         self.map_answer, self.mine_bool = self.make_answer_map()
-        # state 맵
-        self.present_state = np.full((self.nrow, self.ncol), -1) # BFS로 탐색하지 않은 부분을 -1로 초기화
+        self.present_state = np.full((self.nrow, self.ncol), -1)
 
 
     def check_18_up(self, state):
+        '''
+        18개 이상 열린 state인지 확인하는 함수
+        input: state
+        output: 18개 이상 열린 state인지 여부 (bool)
+        '''
         if np.sum(state != -1) >= 18:
             return True
         else:

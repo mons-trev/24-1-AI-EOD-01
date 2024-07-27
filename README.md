@@ -2,8 +2,11 @@
 [ 24-1 /  AI EOD / Team 01 ]  
 👩‍💻 이승연, 변지은
 
+# 목차
+
 
 ---
+
 # 1. Environment
 ## State
 
@@ -18,7 +21,6 @@
 ![environment1](environment1.png)
 
 <br>
-<br>
 
 ## Reward Design
 
@@ -32,7 +34,6 @@
 
 ![environment2](environment2.png)
 
-<br>
 <br>
 
 ### 양수 보상 체계
@@ -89,7 +90,6 @@
 - 음수 보상 체계인 경우에 일정한 기울기로 더 안정적인 성능 향상을 보인다.
 
 <br>
-<br>
 
 ## 속도 개선
 
@@ -97,8 +97,8 @@
 - for문 최소화 → numpy 함수 활용
 - action: index (0~`nrow*ncol`-1)
     - `divmod()` 함수를 통해 좌표로 바꿔서 사용
+- **bfs** 사용: action에 따라 state 맵의 가려진 부분을 열어주는 기능을 구현할 때, que 자료형을 사용하는 bfs 방법을 사용해 속도를 개선했다.
 
-<br>
 <br>
 
 ## Render
@@ -170,8 +170,6 @@ x = self.fc(x)
 
 <br>
 
----
-
 ## CNN + Batch Normalize
 
 ![net2](net2.png)
@@ -221,9 +219,9 @@ x = self.fc(x)
 - 평균 0, 표준 편차 1인 가운데로 값들을 뿌려주기 때문에, 입력 값들에 대한 update 해야하는 편차들이 크지 않는다. 즉, Learning rate를 크게 해도 상관없다. → 빠르고 안정적인 학습 가능
 - Regularization 효과가 있기 때문에 dropout을 안해도 되는 장점
 
-> [train 단계에서의 수식]
-<br>
+> [train 단계에서의 수식] <br>
 $BN(X) = \gamma({{X-\mu batch}\over {\sigma batch}}) + \beta$
+>
 
 - $X$: 입력 데이터
 - $\gamma$: 추가 스케일링
@@ -235,9 +233,9 @@ $BN(X) = \gamma({{X-\mu batch}\over {\sigma batch}}) + \beta$
 
 $\beta$가 있기 때문에 배치 정규화를 적용한 경우 신경망에서 편향을 넣을 필요가 없다.
 
-> [test 단계에서의 수식]
-<br>
+> [test 단계에서의 수식] <br>
 $BN(X) = \gamma({{x-\mu BN}\over {\sigma BN}}) + \beta$
+>
 
 - $\mu BN = {1\over N}\sum_i \mu^i batch$
 - $\sigma BN = {1\over N}\sum_i \sigma ^i batch$
@@ -249,8 +247,6 @@ $BN(X) = \gamma({{x-\mu BN}\over {\sigma BN}}) + \beta$
 참고: [https://velog.io/@js03210/Deep-Learning-Batch-Normalization-배치-정규화](https://velog.io/@js03210/Deep-Learning-Batch-Normalization-%EB%B0%B0%EC%B9%98-%EC%A0%95%EA%B7%9C%ED%99%94)
 
 <br>
-
-- - -
 
 ## 시행착오
 
@@ -272,7 +268,6 @@ $BN(X) = \gamma({{x-\mu BN}\over {\sigma BN}}) + \beta$
 <br>
 
 ---
----
 
 # 3. DQN Agent
 
@@ -281,8 +276,6 @@ $BN(X) = \gamma({{x-\mu BN}\over {\sigma BN}}) + \beta$
 - `env`: 환경. 환경 관련 파라미터를 가져올 때 사용
 
 <br>
-
----
 
 ## get_action
 
@@ -306,9 +299,7 @@ epsilon 탐험을 사용해 action을 선택한다. epsilon의 확률로 랜덤 
 
 batch normalization을 적용한 신경망을 사용하는 경우, 차원의 첫 번째 원소가 batch size이기 때문에 action을 선택할 때 차원이 맞지 않는 문제가 생긴다. 따라서 batch normalization을 적용하지 않은 신경망을 사용할 때보다 `.unsqueeze(0)`를 한 번 더 적용해 차원을 맞춰준다.
 
-<br><br>
-
----
+<br>
 
 ## DQN 알고리즘
 
@@ -335,7 +326,7 @@ self.criterion = nn.MSELoss()
 
 model(DQN 신경망)에 대한 자세한 설명은 [2. DQN 신경망](#-dqn-신경망)
 
-<br><br>
+<br>
 
 ### train_model()
 
@@ -376,9 +367,7 @@ self.optimizer.step()
 
 - 역전파 계산 후 기울기를 optimizer에 맞춰 가중치 수정
 
-<br><br>
-
----
+<br>
 
 ## Optimizer
 
@@ -398,3 +387,148 @@ RAdam도 실험해보았지만 게임판 10개 제한 환경임에도 전혀 학
 [ Adam ]
 
 이후 추가.
+
+<br><br>
+
+---
+
+# 4. Main
+
+## 기본 구조
+
+```python
+for episode in range(EPISODE):
+    # 환경, 평가지표 등등 에피소드마다 리셋
+    env.reset()
+    
+    # 게임 종료까지 반복
+    while not done:
+        cnt += 1
+        
+        # 행동에 따른 보상
+        현재 state -> action 선택 -> step
+        total_reward += reward
+        
+        # 카운트 제한 (에이전트가 갇히는 경우 강제 탈출)
+        if cnt > 전체 좌표 개수:
+                done = True
+        
+        # 리플레이 메모리에 샘플 저장
+        if 18개 이상 열린 state:
+                agent.append.sample()
+                
+        # 학습
+        if 리플레이 메모리 사이즈 > MEM_SIZE_MIN:
+                agent.train_model()
+        
+        # 게임 종료
+        if done or clear:
+                break
+    
+    # 타겟 모델 업데이트 주기마다
+    agent.target_model_update()
+    
+    # 학습률 조절
+    agent.scheduler.step() or 수동 조정
+    
+    평가지표 업데이트
+    
+    # 저장 주기마다
+    모델, 리플레이 메모리, 평가지표 저장 (pickle)
+    
+    # 프린트 주기마다
+    평가지표 프린트
+				
+```
+
+### 18개 이상 샘플 저장
+
+18개 이상 열린 경우에만 샘플을 저장하는 것은 경험에 의한 것이다. 만약 첫 번째 선택에서 주변에 지뢰가 있는 좌표를 선택해(state에서 1~8인 좌표) 게임판이 많이 열리지 않으면 그 게임을 클리어할 가망이 거의 없기 때문이다.
+
+> 18개 이상 열린 경우에만 샘플을 저장하는 것은 초반 학습 속도를 빠르게 하는데 도움을 주긴 하지만, 특정 상황의 샘플을 아예 학습할 수 없게 만들기 때문에 최종 성능에는 좋지 않은 영향을 끼칠 것으로 예상된다. 따라서 추가 실험을 하게 된다면, 초반 에피소드에서만 이 방법을 적용하고 후반 에피소드에서는 모든 샘플을 저장하는 방법으로 바꿔볼 것이다.
+
+<br>
+
+### 카운트 제한
+카운트 제한을 두는 것은 초반 학습을 할 때, 무한 에피소드에서 빠져나오지 못해 수만 번씩 같은 좌표를 누르는 경우가 종종 발생해 초반 학습 속도에 큰 방해가 되기 때문에, 일정 카운트 이상인 경우 강제로 에피소드를 종료하도록 하였다. 또한 같은 좌표를 누르는 샘플이 너무 많이 들어가게 되면 학습에 방해가 될 것이다.
+
+> 현재는 전체 좌표 개수인 81개로 제한을 두었지만, 실제로는 $(전체 좌표 개수 - 지뢰 개수)$ 가 중복없이 가능한 최대 카운트이다. 따라서 추가 실험을 하게 된다면 이 숫자로 수정해볼 것이다.
+
+<br>
+
+## 하이퍼 파라미터
+
+```markdown
+# 리플레이 메모리 관련
+MEM_SIZE = 50000
+MEM_SIZE_MIN = 1000
+
+# 학습률 관련
+LEARN_MAX = 0.001
+LEARN_MIN = 0.0001
+LEARN_EPOCH = 50000
+LEARN_DECAY = 0.75
+
+# 할인율
+GAMMA = 0.1
+
+# 엡실론
+EPSILON = 0.999
+EPSILON_DECAY = 0.99995
+EPSILON_MIN = 0.01
+
+# DQN settings
+BATCH_SIZE = 64
+CONV_UNITS = 64
+UPDATE_TARGET_EVERY = 5
+
+# 게임 환경
+grid_size = (9, 9)
+num_mines = 10
+
+# 출력, 저장 주기
+PRINT_EVERY = 100
+SAVE_EVERY = 1000
+
+# 에피소드 수
+EPISODES = 100000
+```
+
+<br>
+
+### 메모리 관련
+
+- 초반에 실험할 때 `MEM_SIZE = 100,000`, `MEM_SIZE_MIN = 50,000`으로 했었는데, 학습 시작 지점이 너무 늦고, 메모리 사이즈도 너무 커서 좋은 행동을 하는 경우가 적은 초반 에피소드의 샘플이 오랜 에피소드 동안 남아있어 학습 속도가 매우 느렸다. 현재 사이즈가 적당한지는 알 수 없지만, 학습 시작 메모리 사이즈는 작은 것이 훨씬 낫다고 확신한다.
+
+> 초반에 큰 메모리 사이즈로 실험하던 때, 학습이 잘 되지 않아 “reward memory”라는 기능을 추가해 초반 학습 속도를 개선시키고자 했었다. 양수의 reward를 받은 샘플을 저장한 또 다른 메모리를 추가해 reward memory에서 70%, 원래 replay memory에서 30%의 비율로 미니배치를 뽑아 학습에 사용하는 방법이다. 초반 학습 속도 개선에 도움이 되었던 것은 사실이지만, 중복 샘플을 허용한다는 점에서 과적합 문제를 피할 수가 없는 구조이다. 따라서 학습이 원활하게 되기 시작한 시점부터는 사용하지 않았다.
+
+<br>
+
+### 학습률 관련
+
+> 학습률은 아직도 적정한 수치를 모르겠다.
+
+- 학습률이 DQN 학습에 엄청난 영향을 준다는 것을 경험적으로 알 수 있었다. 실제로 지뢰찾기 테스크를 시행하는 동안 가장 큰 성능 향상이 일어난 부분은 학습률을 0.01에서 0.001로 바꿨을 때이다.
+- 최종 모델 두가지의 성능이 10% 정도 차이나는데, 이 차이가 convolution filter 개수에 의한 것인지, lr의 차이 때문인지 정확히 알 수 없다. 최종 모델 두가지 모두 배치 정규화를 적용한 신경망을 사용하기 때문에 lr의 영향을 덜 받지만, 그래서 lr이 너무 작아지면 안되는 것 같기도 하다.
+- scheduler를 사용하는 방법과 수동으로 조절하는 방법을 모두 사용해보았다. scheduler 중 StepLR은 수동으로 조절하는 것과 거의 똑같은 방식으로 작동하기 때문에 상관이 없다. 최종 모델은 모두 수동으로 조절하는 방법을 사용했다.
+- scheduler 중 CycleLR은 최소 lr과 최대 lr을 cosine 함수와 같은 모양으로 일정 에피소드마다 왔다갔다 하는 scheduler이다. 에피소드를 지나면서 경험하는 많은 샘플들을 랜덤 추출하여 미니배치로 학습하는데, 그 미니배치 중에서도 랜덤 선택하여 중요하게 학습할 수 있다고 생각하면 된다. 초반 학습 속도를 올리는데 효과적인 것 같다. 긴 에피소드에서 실험해본 것은 아니지만, 학습을 불안정하게 하는 요소라고 생각해서 사용하지 않았다. 초반 학습 속도에는 확실히 도움이 되는 것 같아 초반에는 CycleLR, 후반에는 StepLR을 사용하는 방법을 시도해보았는데, scheduler가 바뀌는 순간 학습이 너무 불안정해져서 이 방법은 더 이상 사용하지 않았다.
+
+<br>
+
+### 할인율 (Gamma)
+- 너무 크면 학습이 불안정하다. 한 게임의 지속 시간에 따라 달라지겠지만 지뢰찾기 정도의 게임 지속 시간이면 0.1 내외가 적당한 것 같다.
+
+<br>
+
+### epsilon 관련
+- 최소 학습 시작 메모리 사이즈를 작게 설정하고 엡실론 감소율을 낮춰 좀 더 긴 에피소드 동안 탐험을 하도록 하는 것이 초반 학습 속도를 빠르게 하는데 도움이 된다. 엡실론 최솟값은 무한 에피소드 방지를 위해 어느 정도 살려둘 것인지 테스크마다 다르게 설정할 수 있을 것 같다.
+
+<br>
+
+### batch size 관련
+- 128로 해본 적도 있지만, 거의 학습이 되지 않고 속도만 느려지는 것을 확인했다. 64가 적당하다고 생각한다.
+
+<br>
+
+### conv_unit 관련
+- [2. DQN Net](#2.-DQN-Net)에 자세히 적어두었다.

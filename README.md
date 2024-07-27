@@ -535,7 +535,7 @@ EPISODES = 100000
 
 ---
 
-# Rule based
+# Rule based LAB
 
 - 한번 밟은 곳은 다시 밟지 않는 규칙을 기계에게 알려준다.
 

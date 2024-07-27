@@ -546,6 +546,7 @@ EPISODES = 100000
 - 지뢰 `mine`: 지뢰를 밟은 경우
 - 성공 `clear`: 지뢰를 제외한 모든 좌표가 열린 경우
 - `empty`: 지뢰가 아닌 행동
+  
 ```python
   self.reward_dict = {'mine': -8, 'empty':1, 'clear':5}
 ```
@@ -556,8 +557,6 @@ EPISODES = 100000
 | --- | --- | --- |
 | reward | 5 | 1 | 
 | done | True | False | 
-
-- Rule based 에서는 중복 선택을 마스킹을 함으로써 막는다.
 
 - empty reward
   - ver1. 한 에피소드 당, 누르는 횟수가 9번 이상 혹은 안 눌린 버튼이 30개 미만인 경우, machine 은 열려있는 판의 정보를 토대로 지       적인 추론을 해야한다고 판단하였다. 따라서 위의 2가지 경우, 한번 눌렀을 때 터지는 횟수를 `empty` 보상에 곱하여 더 큰 보상을 주었다.
@@ -609,7 +608,7 @@ ver1 보다 ver2 의 보상 체계가 기계의 지적 추론에 도움이 될 �
 
 ## 2. DQN Net
 
-- DQN Net 은 4개의 CNN 층, 1개의 fc 층으로 설계하였다. batch normalization 의 경우, 4개의 CNN 층에 모두 적용하는 것보다, 일부에만 적용시키는 것이 초기에 성능이 수렴하는데 더 좋다는 것을 경험적으로 발견하였다. 또한, a* 알고리즘에 기반한 classification task 에 쓰이는 fc 층 지수승 감소가 오히려 이 task 에서 성능이 안 좋다는 것 또한 발견하여 fc layer 는 하나의 층으로 구성하였다.
+- DQN Net 은 4개의 CNN 층, 1개의 fc 층으로 설계하였다. <br> batch normalization 의 경우, 4개의 CNN 층에 모두 적용하는 것보다, 일부에만 적용시키는 것이 초기에 성능이 수렴하는데 더 좋다는 것을 경험적으로 발견하였다. <br>또한, a* 알고리즘에 기반한 classification task 에 쓰이는 fc 층 지수승 감소가 오히려 이 task 에서 성능이 안 좋다는 것 또한 발견하여 fc layer 는 하나의 층으로 구성하였다.
   
 ```python
 class DQN_Net(nn.Module):
@@ -637,7 +636,7 @@ class DQN_Net(nn.Module):
 ```
 
 ## 3. CONFIG
-DQN Agent 를 구현하기 위한 CONFIG 설정 값이다. 약 4300 EPISODE 정도 탐색을 할 수 있도록 `EPSILON`, `EPSILON_DECAY`, `EPSILON_MIN` 값을 설정하였다. 또한, LEARN_MAX 를 0.005로 크게 설정한 것을 볼 수 있는데, 초기에 큰 Learning rate 가 수렴 속도를 빠르게 한다는 것을 확인하였기 때문이다.
+DQN Agent 를 구현하기 위한 CONFIG 설정 값이다. <br>약 4300 EPISODE 정도 탐색을 할 수 있도록 `EPSILON`, `EPSILON_DECAY`, `EPSILON_MIN` 값을 설정하였다. 또한, LEARN_MAX 를 0.005로 크게 설정한 것을 볼 수 있는데, 초기에 큰 Learning rate 가 수렴 속도를 빠르게 한다는 것을 확인하였기 때문이다.
 
 ```python
 MEM_SIZE = 50000
@@ -668,8 +667,8 @@ SAVE_EVERY=1000
 
 ## 4. DQN Agent
 
-DQN 에서 행동을 선택할 때, 2가지의 경우가 있다. 하나는 탐색으로 무작위로 하나를 뽑는 것이다. 현 모델을 Rule based 이기 때문에 밟지 않은 좌표 중 아무거나 하나를 반환하도록 설계하였다.
-나머지 하나는 탐욕 정책을 따르는 것인데, state 를 입력으로 주었을 때 가장 큰 q 값을 가진 action 을 반환하는 것이다. 따라서 밟지 않은 좌표 중 가장 큰 q 값을 가지는 것을 반환하도록 하였다. 이 때, 가장 큰 값을 구하기 위하여 밟은 곳은 -inf 마스킹을 해주어 양수, 음수 구분을 따로 하지 않고 한번에 최댓값을 반환할 수 있도록 하여 시간복잡도를 낮추었다.
+DQN 에서 행동을 선택할 때, 2가지의 경우가 있다. <br>하나는 탐색으로 무작위로 하나를 뽑는 것이다. 현 모델을 Rule based 이기 때문에 밟지 않은 좌표 중 아무거나 하나를 반환하도록 설계하였다.
+나머지 하나는 탐욕 정책을 따르는 것인데, state 를 입력으로 주었을 때 가장 큰 q 값을 가진 action 을 반환하는 것이다. 따라서 밟지 않은 좌표 중 가장 큰 q 값을 가지는 것을 반환하도록 하였다. <br>이 때, 가장 큰 값을 구하기 위하여 밟은 곳은 -inf 마스킹을 해주어 양수, 음수 구분을 따로 하지 않고 한번에 최댓값을 반환할 수 있도록 하여 시간복잡도를 낮추었다.
 
 ```python
 def get_action(self, state):
@@ -702,7 +701,7 @@ def get_action(self, state):
                 return x, y
 ```
 
-train_model 함수
+### train_model 함수
 
 Rule based 는 No Rule based 와 train_model 을 다르게 설계하였다. <br>
 Rule based 에선 next_state 를 input 으로 받고 최대 q 값을 반환하는 target model 에도 밟은 곳은 또 밟지 않는다는 것을 알려주기 위해 마스킹 작업을 하였다. 

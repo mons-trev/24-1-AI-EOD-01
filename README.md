@@ -752,7 +752,7 @@ if (episode+1) % LEARN_EPOCH == 0:
 
 ### test
 - test 는 model 을 evaluation 모드로 바꾸고, 탐색하는 과정을 없애 구현하였다.
-- 1만 EPISODE 로 테스트를 진행하고, 성능을 100 EPISODE 마다 기록하였다. Rule based 시, 최대 100 번 테스트 당 47 번 `CLEAR` 하는 것을 알 수 있고 평균 약 28% 의 성능을 내는 것을 확인하였다.
+- 1만 EPISODE 로 테스트를 진행하고, 성능을 100 EPISODE 마다 기록하였다. Rule based 시, 최대 47% `CLEAR` 하는 것을 알 수 있고 평균 약 28% 의 성능을 내는 것을 확인하였다.
 - 약 70% 의 성능으로 수렴하는 No Rule based 에 비해 Rule based model 이 더 낮은 성능을 기록하는 것을 확인하였다.
   ![image](https://github.com/user-attachments/assets/b5ab6e3b-abea-4d6b-ba26-d1cc6937e52e)
 

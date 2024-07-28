@@ -537,7 +537,9 @@ EPISODES = 100000
 
 # Rule based LAB
 
-- 한번 밟은 곳은 다시 밟지 않는 규칙을 기계에게 알려준다.
+- 앞서 설명한 No Rule based 설명이 자세히 되어 있으므로, No Rule based 와의 차이와 특이점에 대하여 자세히 설명토록 하겠습니다.
+  
+- 한번 밟은 곳은 다시 밟지 않는 규칙을 기계에게 알려주었습니다. 
 
 ## 1. Environment
 ### Reward Design
